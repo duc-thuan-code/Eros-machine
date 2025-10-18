@@ -3,31 +3,49 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Yellow Pages — Demo (single file)</title>
+<title>Eros Machine édition</title>
 <style>
   :root{
-    --bg:#0a0a0a;         /* near‑black */
-    --fg:#f7f7f7;         /* near‑white */
-    --ink:#000;           /* black text on tiles */
-    --yel:#ffd900;        /* punchy yellow */
-    --yel-2:#ffe24d;      /* lighter hover */
+    --fg:#f7f7f7;
+    --ink:#000;
+    --yel:#ffd900;
+    --yel-2:#ffe24d;
     --muted:#b3b3b3;
     --grid-gap:14px;
     --side-w: 320px;
     --radius: 10px;
+    --overlay: rgba(0,0,0,0.65);
+    --overlay-2: rgba(0,0,0,0.55);
   }
   html,body{height:100%;}
   body{
     margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    background:var(--bg); color:var(--fg);
+    color:var(--fg);
     -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    background-color:#000; /* first screen is pure black */
+    background-size:cover; background-position:center; background-repeat:no-repeat;
   }
   a{color:inherit; text-decoration:none}
-  .app{display:grid; grid-template-columns: var(--side-w) 1fr; min-height:100dvh}
+
+  /* Dissolve background transition */
+  body.bg-fade{
+    transition: background-image 0.3s linear;
+  }
+
+  /* ————— first slide (full-screen, black, centered logo) ————— */
+  .intro{ height:100dvh; display:grid; place-items:center; background:#000; position:relative; }
+  .intro-logo{ width:min(42vw, 520px); max-width:80%; height:auto; image-rendering:auto; }
+  .scroll-hint{ position:absolute; bottom:22px; left:50%; transform:translateX(-50%); font-size:14px; color:#9a9a9a; letter-spacing:.06em }
+
+  /* ————— app layout (below the fold) ————— */
+  .app{display:grid; grid-template-columns: var(--side-w) 1fr; min-height:100dvh; background-color: var(--overlay)}
+
   /* ————— left column ————— */
   .side{
     position:sticky; top:0; align-self:start; height:100dvh;
     display:flex; flex-direction:column; gap:18px; padding:24px 18px; border-right:1px solid #1c1c1c;
+    background: rgba(0,0,0,0.78);
+    backdrop-filter: blur(2px);
   }
   .brand{display:flex; align-items:baseline; gap:10px}
   .brand h1{font-size:24px; letter-spacing:.2px; margin:0; font-weight:700}
@@ -46,12 +64,8 @@
   footer a{color:#bdbdbd; text-decoration:underline}
 
   /* ————— right column (grid) ————— */
-  .grid-wrap{padding:24px;}
-  .grid{
-    display:grid; gap:var(--grid-gap);
-    grid-template-columns: repeat(12, 1fr);
-  }
-  /* responsive columns */
+  .grid-wrap{padding:24px; background: var(--overlay-2)}
+  .grid{ display:grid; gap:var(--grid-gap); grid-template-columns: repeat(12, 1fr); }
   @media (max-width: 1400px){ .grid{grid-template-columns: repeat(10,1fr);} }
   @media (max-width: 1200px){ .grid{grid-template-columns: repeat(8,1fr);} }
   @media (max-width: 1024px){ .grid{grid-template-columns: repeat(6,1fr);} .app{grid-template-columns: 280px 1fr} }
@@ -61,35 +75,49 @@
   .tile{
     grid-column: span 4; aspect-ratio: 1 / 1.2; background:var(--yel); color:var(--ink);
     border-radius: var(--radius); border:1px solid #00000024; box-shadow: 0 2px 0 #00000055;
-    display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; position:relative;
+    display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden; position:relative;
     transition: transform .08s ease, box-shadow .08s ease, background .15s ease;
   }
   .tile:hover{ transform: translateY(-2px); box-shadow:0 4px 0 #00000066; background:var(--yel-2)}
-  .tile .thumb{flex:1; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:28px; letter-spacing:.2px}
-  .tile .meta{padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; background:#00000010}
+  .tile .cover{position:absolute; inset:0; background-size:cover; background-position:center; filter:saturate(1) contrast(1.02)}
+  .tile .meta{position:relative; z-index:1; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; background:#00000066; color:#fff}
   .tile .meta .t{font-weight:600; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .tile .meta .p{font-variant-numeric: tabular-nums}
   .tile:focus-visible{outline:3px solid #fff}
 
-  /* About modal */
+  /* Modal (About + Gallery share same styling) */
   .modal-backdrop{position:fixed; inset:0; background:#000000a6; display:none; align-items:center; justify-content:center; padding:20px;}
-  .modal{max-width:760px; width:min(92vw, 760px); background:#0f0f0f; border:1px solid #222; border-radius:14px; box-shadow:0 12px 40px #000000b0}
-  .modal header{display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid #1b1b1b}
+  .modal{max-width:960px; width:min(96vw, 960px); background:#0f0f0f; border:1px solid #222; border-radius:14px; box-shadow:0 12px 40px #000000b0}
+  .modal header{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid #1b1b1b}
   .modal header h2{margin:0; font-size:18px}
-  .modal .content{padding:18px; line-height:1.5; color:#d6d6d6}
+  .modal .content{padding:14px; line-height:1.5; color:#d6d6d6}
   .modal .content p{margin:.6em 0}
   .modal .content .hint{color:#9a9a9a; font-size:14px}
   .modal .close{background:#151515; border:1px solid #2a2a2a; padding:6px 10px; border-radius:8px}
   .modal .close:hover{background:#191919}
   .modal-backdrop[aria-hidden="false"]{display:flex}
 
-  /* simple focus ring for keyboard users */
+  /* Gallery */
+  .gallery{background:#0a0a0a}
+  .gallery main{ position:relative; }
+  .gallery img{ width:100%; height:auto; display:block; max-height:76vh; object-fit:contain; background:#000 }
+  .gallery .bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border-top:1px solid #1b1b1b; color:#cfcfcf }
+  .gallery .nav{ display:flex; gap:8px }
+  .icon-btn{ background:#151515; border:1px solid #2a2a2a; padding:6px 10px; border-radius:8px }
+  .icon-btn:hover{ background:#191919 }
+
   *:focus-visible{outline:2px solid #ffffffcc; outline-offset:2px}
 </style>
 </head>
-<body>
-  <div class="app">
-    <!-- Left: title + list -->
+<body class="bg-fade">
+  <!-- First slide / hero -->
+  <section class="intro" id="intro">
+    <img src="/photos/logo.png" alt="Logo" class="intro-logo" />
+    <div class="scroll-hint">Scroll ↓</div>
+  </section>
+
+  <!-- Main app (appears after scrolling past the intro) -->
+  <div class="app" id="appRoot">
     <aside class="side">
       <div class="brand" aria-label="site brand">
         <div class="dot" aria-hidden="true"></div>
@@ -101,126 +129,158 @@
       </div>
 
       <ul class="list" id="titleList" aria-label="Titles">
-        <!-- The list is mirrored from the grid below for easy navigation. Replace href with real links if needed. -->
-        <li><a href="#t1"><span class="title">fäderliecht</span><span class="year">2024</span></a></li>
-        <li><a href="#t2"><span class="title">Ultra Hut</span><span class="year">2024</span></a></li>
-        <li><a href="#t3"><span class="title">Titles for Electronic Equipment</span><span class="year">2023</span></a></li>
-        <li><a href="#t4"><span class="title">1 + 1 + 1 + 1 + 1 = 1</span><span class="year">2023</span></a></li>
-        <li><a href="#t5"><span class="title">The Color of the Sun</span><span class="year">2022</span></a></li>
-        <li><a href="#t6"><span class="title">The Skateboard</span><span class="year">2022</span></a></li>
-        <li><a href="#t7"><span class="title">Kranke Kinder</span><span class="year">2021</span></a></li>
-        <li><a href="#t8"><span class="title">The End of the World of the End</span><span class="year">2021</span></a></li>
-        <li><a href="#t9"><span class="title">Big Yellow Tote</span><span class="year">2020</span></a></li>
-        <li><a href="#t10"><span class="title">A Final Companion to Books from the Simpsons</span><span class="year">2020</span></a></li>
-        <li><a href="#t11"><span class="title">Bartworks II</span><span class="year">2019</span></a></li>
+        <!-- Filled from /data/projects.json if present; else defaults -->
       </ul>
 
       <footer>
-        <div style="margin-top:10px">Single‑file demo (HTML + CSS only). Replace links/text as you wish.</div>
+        <div style="margin-top:10px">Drop images in <code>/photos</code>. Optional text data in <code>/data/projects.json</code> and <code>/data/backgrounds.json</code>.</div>
       </footer>
     </aside>
 
-    <!-- Right: grid of yellow tiles (no external images) -->
     <main class="grid-wrap">
       <section class="grid" id="grid">
-        <!-- Each tile can link out or anchor to details. Use the big label area as a stand‑in for cover images. -->
-        <a id="t1" class="tile" href="#" title="Open: fäderliecht">
-          <div class="thumb">fäderliecht</div>
-          <div class="meta"><span class="t">fäderliecht</span><span class="p">€32</span></div>
-        </a>
-        <a id="t2" class="tile" href="#" title="Open: Ultra Hut">
-          <div class="thumb">Ultra Hut</div>
-          <div class="meta"><span class="t">Ultra Hut</span><span class="p">€28</span></div>
-        </a>
-        <a id="t3" class="tile" href="#" title="Open: Titles for Electronic Equipment">
-          <div class="thumb">Electronic Equipment</div>
-          <div class="meta"><span class="t">Titles for Electronic Equipment</span><span class="p">€36</span></div>
-        </a>
-        <a id="t4" class="tile" href="#" title="Open: 1+1+1+1+1=1">
-          <div class="thumb">1 + 1 + 1 + 1 + 1 = 1</div>
-          <div class="meta"><span class="t">1 + 1 + 1 + 1 + 1 = 1</span><span class="p">€24</span></div>
-        </a>
-        <a id="t5" class="tile" href="#" title="Open: The Color of the Sun">
-          <div class="thumb">The Color of the Sun</div>
-          <div class="meta"><span class="t">The Color of the Sun</span><span class="p">€30</span></div>
-        </a>
-        <a id="t6" class="tile" href="#" title="Open: The Skateboard">
-          <div class="thumb">The Skateboard</div>
-          <div class="meta"><span class="t">The Skateboard</span><span class="p">€26</span></div>
-        </a>
-        <a id="t7" class="tile" href="#" title="Open: Kranke Kinder">
-          <div class="thumb">Kranke Kinder</div>
-          <div class="meta"><span class="t">Kranke Kinder</span><span class="p">€22</span></div>
-        </a>
-        <a id="t8" class="tile" href="#" title="Open: The End of the World of the End">
-          <div class="thumb">End of the World</div>
-          <div class="meta"><span class="t">The End of the World of the End</span><span class="p">€18</span></div>
-        </a>
-        <a id="t9" class="tile" href="#" title="Open: Big Yellow Tote">
-          <div class="thumb">Big Yellow Tote</div>
-          <div class="meta"><span class="t">Big Yellow Tote</span><span class="p">€18</span></div>
-        </a>
-        <a id="t10" class="tile" href="#" title="Open: Final Companion to Books from the Simpsons">
-          <div class="thumb">Companion — Simpsons</div>
-          <div class="meta"><span class="t">A Final Companion to Books from the Simpsons</span><span class="p">€40</span></div>
-        </a>
-        <a id="t11" class="tile" href="#" title="Open: Bartworks II">
-          <div class="thumb">Bartworks II</div>
-          <div class="meta"><span class="t">Bartworks II</span><span class="p">€34</span></div>
-        </a>
+        <!-- Auto-generated tiles -->
       </section>
     </main>
   </div>
 
-  <!-- About modal (text paraphrased; replace with your own) -->
+  <!-- About modal -->
   <div class="modal-backdrop" id="aboutModal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="modal" role="document">
       <header>
-        <h2>About Yellow Pages</h2>
-        <button class="close" type="button" id="closeAbout">OK</button>
+        <h2>About</h2>
+        <button class="close" type="button" data-close>OK</button>
       </header>
       <div class="content">
-        <p>Yellow Pages publishes books on—naturally—yellow paper. The project was initiated by Olivier Lebrun and Urs Lehni. It embraces black & yellow as a signature palette (with room for other colors too) and is stocked by international distributors.</p>
-        <p class="hint">This is a single‑file front‑end recreation for study/demo use. Swap in your own copy, links, and pricing as needed.</p>
+        <p>First screen shows a pure black background with your <code>logo.png</code>. After you scroll, the background rotates through <code>BG1.jpg</code>, <code>BG2.jpg</code>, <code>BG3.jpg</code> every 3 minutes. Up to 12 projects supported. Each project uses a cover <code>Pxx-0.png</code> plus up to five additional images (<code>Pxx-1.png</code> … <code>Pxx-5.png</code>).</p>
+        <p>All images in <code>/photos</code>. Optional data overrides in <code>/data/projects.json</code> and <code>/data/backgrounds.json</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery modal -->
+  <div class="modal-backdrop" id="galleryModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal gallery" role="document">
+      <header>
+        <h2 id="galleryTitle">Gallery</h2>
+        <button class="close" type="button" data-close>Close</button>
+      </header>
+      <main>
+        <img id="galleryImage" alt="Project image" loading="eager" />
+      </main>
+      <div class="bar">
+        <div id="galleryCounter">1 / 1</div>
+        <div class="nav">
+          <button class="icon-btn" id="prevBtn" type="button" aria-label="Previous">◀</button>
+          <button class="icon-btn" id="nextBtn" type="button" aria-label="Next">▶</button>
+        </div>
       </div>
     </div>
   </div>
 
 <script>
-  // Simple easter egg for the Play button
-  const playBtn = document.getElementById('playBtn');
-  playBtn?.addEventListener('click', () => {
-    const tiles = [...document.querySelectorAll('.tile')];
-    let i = 0;
-    const t = setInterval(()=>{
-      tiles[i%tiles.length].style.transform = 'translateY(-6px) rotate(-.5deg)';
-      setTimeout(()=> tiles[i%tiles.length].style.transform='', 180);
-      i++; if(i>tiles.length*3) clearInterval(t);
-    }, 120);
-  });
+  async function loadJSON(url, fallback){
+    try{
+      const r = await fetch(url, {cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return await r.json();
+    }catch(e){ return fallback; }
+  }
 
-  // About modal handlers
-  const aboutBtn = document.getElementById('aboutBtn');
-  const aboutModal = document.getElementById('aboutModal');
-  const closeAbout = document.getElementById('closeAbout');
-  function openAbout(){ aboutModal.setAttribute('aria-hidden','false'); closeAbout.focus(); }
-  function closeAboutFn(){ aboutModal.setAttribute('aria-hidden','true'); aboutBtn.focus(); }
-  aboutBtn?.addEventListener('click', openAbout);
-  closeAbout?.addEventListener('click', closeAboutFn);
-  aboutModal?.addEventListener('click', (e)=>{ if(e.target === aboutModal) closeAboutFn(); });
-  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && aboutModal.getAttribute('aria-hidden')==='false') closeAboutFn(); });
+  const DEFAULT_BACKGROUNDS = [
+    '/photos/BG1.jpg',
+    '/photos/BG2.jpg',
+    '/photos/BG3.jpg'
+  ];
+  let backgrounds = DEFAULT_BACKGROUNDS.slice();
+  let bgIndex = 0;
+  let bgActivated = false;
+  let bgTimer = null;
 
-  // Optional: sync side list highlighting with scroll position
-  const listLinks = [...document.querySelectorAll('.list a')];
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach((entry)=>{
-      if(entry.isIntersecting){
-        const id = entry.target.getAttribute('id');
-        listLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+id));
+  function applyBackground(){
+    document.body.style.backgroundImage = `url('${backgrounds[bgIndex]}')`;
+    bgIndex = (bgIndex+1)%backgrounds.length;
+  }
+  function preload(srcs){ srcs.forEach(src=>{ const i=new Image(); i.src=src; }); }
+  function activateBackgrounds(){
+    if(bgActivated) return;
+    bgActivated = true;
+    preload(backgrounds);
+    applyBackground();
+    bgTimer = setInterval(applyBackground, 180000);
+  }
+
+  const intro = document.getElementById('intro');
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting){
+        activateBackgrounds();
+        observer.disconnect();
       }
-    })
-  },{root:null, rootMargin:'-30% 0px -50% 0px', threshold:0});
-  document.querySelectorAll('.tile').forEach(el=> io.observe(el));
-</script>
-</body>
-</html>
+    });
+  }, { threshold: 0.01 });
+  observer.observe(intro);
+
+  const DEFAULT_PROJECTS = Array.from({length:12}).map((_,i)=>{
+    const idx = (i+1).toString().padStart(2,'0');
+    return { id:`P${idx}`, title:`Project ${idx}`, price:"", year:"", maxImages:6 };
+  });
+  let PROJECTS = DEFAULT_PROJECTS.slice();
+
+  const list = document.getElementById('titleList');
+  const grid = document.getElementById('grid');
+
+  function render(){
+    list.innerHTML = '';
+    grid.innerHTML = '';
+
+    PROJECTS.forEach(p=>{
+      const li = document.createElement('li');
+      const year = p.year ? String(p.year) : '';
+      li.innerHTML = `<a href="#${p.id}"><span class="title">${escapeHTML(p.title||p.id)}</span><span class="year">${year}</span></a>`;
+      list.appendChild(li);
+
+      const a = document.createElement('a');
+      a.id = p.id; a.className = 'tile'; a.href = 'javascript:void(0)'; a.setAttribute('data-proj', p.id);
+
+      const cover = document.createElement('div');
+      cover.className = 'cover';
+      cover.style.backgroundImage = `url('/photos/${p.id}-0.png')`;
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const price = p.price ? `<span class="p">${escapeHTML(p.price)}</span>` : '<span class="p"></span>';
+      meta.innerHTML = `<span class="t">${escapeHTML(p.title||p.id)}</span>${price}`;
+
+      a.appendChild(cover); a.appendChild(meta); grid.appendChild(a);
+    });
+  }
+
+  function escapeHTML(s){ return s?.replace(/[&<>\"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])) || ''; }
+
+  const galleryModal = document.getElementById('galleryModal');
+  const galleryImage = document.getElementById('galleryImage');
+  const galleryTitle = document.getElementById('galleryTitle');
+  const galleryCounter = document.getElementById('galleryCounter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  let currentList = [];
+  let currentIndex = 0;
+
+  function openGallery(projectId){
+    galleryModal.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+    const p = PROJECTS.find(p=>p.id===projectId);
+    galleryTitle.textContent = p?.title || projectId;
+    loadProjectImages(projectId, p?.maxImages ?? 6).then(urls=>{
+      currentList = urls;
+      currentIndex = 0;
+      showIndex(0);
+    });
+  }
+  function closeGallery(){ galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+  function showIndex(i){
+    if(!currentList.length) return;
+    currentIndex = (i+currentList.length)%currentList.length;
+    galleryImage.src = currentList[currentIndex];

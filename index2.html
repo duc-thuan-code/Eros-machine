@@ -1,434 +1,120 @@
-<!doctype html>
-<html lang="fr">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>EROS•MACHINE — Single file</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yellow Pages Recreation</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <style>
-  :root{
-    --bg-overlay: rgba(0,0,0,0.6);
-    --fg: #fff;
-    --muted: #9a9a9a;
-    --accent: #ffd900;
-    --radius: 10px;
-  }
-  html,body{height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Arial; color:var(--fg); background:#000;}
-  a{color:inherit; text-decoration:none}
+  * {margin: 0; padding: 0; box-sizing: border-box;}
+  body, html {height: 100%; font-family: 'Roboto', sans-serif; overflow-x: hidden; background: #000; color: #000;}
 
-  /* ---------- hero (first, fixed black with logo) ---------- */
-  .hero{
-    height:100vh; width:100%;
-    display:grid; place-items:center;
-    background:#000;
-    position:relative;
-    z-index:6;
-  }
-  .hero img{ width:min(480px, 42vw); max-width:82%; height:auto; display:block; }
+  /* First Slide (Logo Section) */
+  section#intro {display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #000;}
+  #intro img {width: 180px; height: auto; animation: fadeIn 1s ease-in;}
 
-  .scroll-hint{ position:absolute; left:50%; bottom:18px; transform:translateX(-50%); color:var(--muted); font-size:13px; z-index:7; }
+  /* Main Wrapper */
+  .main-wrapper {position: relative; z-index: 1;}
 
-  /* ---------- background layer (appears after hero) ---------- */
-  .bg-layer{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-  .bg-item{
-    position:absolute; inset:0; background-size:cover; background-position:center; opacity:0;
-    transition: opacity 500ms linear;
-    will-change:opacity;
-  }
-  .bg-item.visible{ opacity:1; }
-
-  /* Dark overlay on top of backgrounds so content reads well */
-  .bg-overlay{
-    position:fixed; inset:0; background:var(--bg-overlay); z-index:1; pointer-events:none;
+  /* Background Slideshow */
+  .background {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    transition: opacity 300ms linear;
   }
 
-  /* ---------- main app layout (below hero) ---------- */
-  .app-wrap{ position:relative; z-index:4; padding:48px 28px; background:transparent; margin-top:-4px; }
-  .container{ max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 68px 1fr; gap:20px; align-items:start; }
-  /* left column controls */
-  .left-col{ position:sticky; top:24px; height:calc(100vh - 48px); align-self:start; display:flex; flex-direction:column; gap:12px; z-index:5; }
-  .icon-btn{
-    width:56px; height:56px; border-radius:12px; background:rgba(0,0,0,0.45); border:1px solid #111; display:grid; place-items:center; cursor:pointer;
+  /* Project Section */
+  section.project {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
   }
-  .icon-btn svg{ width:28px; height:28px; fill:var(--fg); }
-
-  /* center area: project title + grid */
-  .center{ padding:8px 0; }
-  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
-  .project-title{ font-weight:700; font-size:20px; text-align:center; flex:1; }
-  .right-icon{ width:42px; height:42px; display:grid; place-items:center; border-radius:10px; background:rgba(0,0,0,0.45); border:1px solid #111; cursor:pointer; }
-  .right-icon svg{ width:22px;height:22px; fill:var(--fg); }
-
-  /* grid of covers */
-  .grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; }
-  @media (max-width:900px){ .container{ grid-template-columns: 52px 1fr } .grid{ grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width:520px){ .container{ grid-template-columns: 48px 1fr } .grid{ grid-template-columns: 1fr; } }
-
-  .tile{
-    position:relative; border-radius:12px; overflow:hidden; min-height:220px; background:#111; box-shadow:0 6px 24px rgba(0,0,0,0.6);
-    display:flex; align-items:flex-end; justify-content:flex-start; cursor:pointer;
+  section.project h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
   }
-  .tile .cover{ position:absolute; inset:0; background-size:cover; background-position:center; filter:contrast(1.02) saturate(1); }
-  .tile .meta{ position:relative; z-index:2; padding:12px 14px; background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%); width:100%; color:#fff; font-weight:600; }
+  section.project img.cover {
+    width: 40vw;
+    max-width: 700px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  }
+  section.project .icons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  section.project .material-icons {
+    font-size: 36px;
+    cursor: pointer;
+    color: #ffeb3b;
+    transition: transform 0.3s;
+  }
+  section.project .material-icons:hover {
+    transform: scale(1.1);
+  }
 
-  /* menu overlay (project list) */
-  .menu-overlay{ position:fixed; left:18px; bottom:24px; z-index:8; max-width:360px; background:rgba(0,0,0,0.9); border:1px solid #111; border-radius:10px; padding:12px; display:none; }
-  .menu-overlay.open{ display:block; }
-  .menu-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; }
-  .menu-list button{ text-align:left; padding:8px 10px; background:transparent; border:none; color:var(--fg); font-weight:600; cursor:pointer; border-radius:6px; }
-  .menu-list button:hover{ background:rgba(255,255,255,0.03); }
-
-  /* gallery modal */
-  .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:12; background:rgba(0,0,0,0.85); padding:20px; }
-  .modal-backdrop.open{ display:flex; }
-  .modal{ width:min(92vw,1100px); max-height:92vh; background:#0a0a0a; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
-  .modal .viewer{ flex:1; display:grid; place-items:center; background:#000; }
-  .modal img{ max-width:100%; max-height:76vh; object-fit:contain; display:block; }
-  .modal .bar{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-top:1px solid #111; }
-  .nav-btn{ background:transparent; border:none; padding:8px; cursor:pointer; border-radius:8px; color:var(--fg); }
-  .small-icon{ width:28px; height:28px; vertical-align:middle; fill:var(--fg); }
-
-  /* bottom text block (black block) */
-  .bottom-block{ background:#000; padding:64px 24px; color:var(--fg); text-align:left; }
-  .bottom-block .inner{ max-width:1100px; margin:0 auto; font-size:15px; line-height:1.55; color:#ddd; }
-
-  /* newsletter */
-  .newsletter{ margin-top:18px; display:flex; gap:8px; max-width:520px; }
-  .newsletter input[type="email"]{ flex:1; padding:10px 12px; border-radius:6px; border:1px solid #222; background:#0b0b0b; color:var(--fg); }
-  .newsletter button{ padding:10px 14px; border-radius:6px; background:transparent; border:1px solid #333; color:var(--fg); cursor:pointer; }
-
-  /* accessibility focus */
-  :focus{ outline:2px solid rgba(255,255,255,0.12); outline-offset:2px; }
-
-  /* small helpers */
-  .muted{ color:var(--muted); font-size:13px; }
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
 </style>
 </head>
 <body>
-
-  <!-- HERO: full black with logo -->
-  <section class="hero" id="hero">
-    <img src="/logo.jpg" alt="EROS MACHINE logo" />
-    <div class="scroll-hint">Scroll ↓</div>
+  <section id="intro">
+    <img src="/photos/logo.png" alt="Logo">
   </section>
 
-  <!-- Background layer (hidden while hero visible). Each bg-item is toggled with .visible for dissolve -->
-  <div class="bg-layer" id="bgLayer" aria-hidden="true">
-    <div class="bg-item" id="bg0" style="background-image:url('/images/BG/bg1.jpg')"></div>
-    <div class="bg-item" id="bg1" style="background-image:url('/images/BG/bg2.jpg')"></div>
-    <div class="bg-item" id="bg2" style="background-image:url('/images/BG/bg3.jpg')"></div>
+  <div class="background" id="background"></div>
+
+  <div class="main-wrapper">
+    <!-- Example Project -->
+    <section class="project">
+      <h1>Project 01</h1>
+      <img src="/photos/P01-0.png" class="cover" alt="Project Cover">
+      <div class="icons">
+        <span class="material-icons">photo_library</span>
+        <span class="material-icons">open_in_new</span>
+      </div>
+    </section>
+
+    <section class="project">
+      <h1>Project 02</h1>
+      <img src="/photos/P02-0.png" class="cover" alt="Project Cover">
+      <div class="icons">
+        <span class="material-icons">photo_library</span>
+        <span class="material-icons">open_in_new</span>
+      </div>
+    </section>
   </div>
-  <div class="bg-overlay" aria-hidden="true"></div>
-
-  <!-- MAIN CONTENT (below hero) -->
-  <div class="app-wrap" id="appWrap">
-    <div class="container">
-
-      <!-- left column: menu / back button -->
-      <div class="left-col">
-        <div id="menuBtn" class="icon-btn" title="Menu" aria-label="Menu">
-          <!-- Material menu icon -->
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-        </div>
-
-        <!-- menu overlay -->
-        <div class="menu-overlay" id="menuOverlay" aria-hidden="true">
-          <div class="muted" style="padding:6px 8px 10px 8px">Projects</div>
-          <ul class="menu-list" id="menuList" role="list"></ul>
-        </div>
-      </div>
-
-      <!-- center column -->
-      <div class="center">
-        <div class="topbar">
-          <div style="width:56px"></div>
-          <div class="project-title" id="currentTitle">EROS•MACHINE — Sélection</div>
-          <div id="nextProjectBtn" class="right-icon" title="Next project" aria-label="Next">
-            <!-- Material chevron_right -->
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6l6 6-6 6V6z"/></svg>
-          </div>
-        </div>
-
-        <!-- grid of project covers -->
-        <div class="grid" id="grid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- gallery modal -->
-  <div class="modal-backdrop" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal" role="document" aria-live="polite">
-      <div class="viewer">
-        <img id="modalImage" alt="Project image" src="" />
-      </div>
-      <div class="bar">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <!-- back / menu toggles here -->
-          <button id="backBtn" class="nav-btn" title="Back">
-            <!-- left arrow (material) -->
-            <svg class="small-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-          </button>
-          <div id="modalTitle" style="font-weight:700;"></div>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:10px;">
-          <button id="prevBtn" class="nav-btn" title="Previous image">
-            <!-- chevron_left -->
-            <svg class="small-icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-          </button>
-          <div id="counter" class="muted">0 / 0</div>
-          <button id="nextBtn" class="nav-btn" title="Next image">
-            <!-- chevron_right -->
-            <svg class="small-icon" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- bottom block: text + newsletter -->
-  <section class="bottom-block" id="bottom">
-    <div class="inner">
-      <p>
-EROS•MACHINE propose un ensemble d'éditions d'artistes réalisées de manières collectives ou individuelles. Nos publications déclinent des séries d'images, mêlant des vocabulaires abstraits à des références érotiques ou pornographiques. Nos éditions mettent en évidence, dans leur transparence, la circulation des désirs, leurs codes et leurs modes de représentations au sein de la culture queer.
-      </p>
-
-      <div style="margin-top:22px">
-        <form id="newsletter" class="newsletter" action="mailto:onecreationperday@gmail.com" method="POST" enctype="text/plain">
-          <input type="email" name="email" placeholder="Votre email" required />
-          <button type="submit">S'abonner</button>
-        </form>
-      </div>
-    </div>
-  </section>
 
 <script>
-/* ---------- data (project titles) ---------- */
-const PROJECT_TITLES = [
-  "Salade jus.. I",
-  "Salade jus.. II",
-  "SOUL and SPIRIT of the male nude",
-  "Le cabinet d'amour",
-  "Alexandre notre enfant",
-  "Skin on skin",
-  "Seriegraphie Thuan",
-  "Homage to Hockey",
-  "Glory",
-  "Dizzimages #1",
-  "Chéri-graphie"
-];
-const PROJECT_COUNT = PROJECT_TITLES.length;
+  const backgrounds = ['/photos/BG1.jpg', '/photos/BG2.jpg', '/photos/BG3.jpg'];
+  let index = 0;
+  const bg = document.getElementById('background');
 
-/* ---------- helper: create covers grid ---------- */
-const grid = document.getElementById('grid');
-const menuList = document.getElementById('menuList');
-const currentTitle = document.getElementById('currentTitle');
-
-for(let i=0;i<PROJECT_COUNT;i++){
-  const idx = i+1;
-  const pid = `p${idx}`;
-  // tile element
-  const tile = document.createElement('div');
-  tile.className = 'tile';
-  tile.dataset.pid = pid;
-  tile.dataset.index = i;
-  const cover = document.createElement('div');
-  cover.className = 'cover';
-  cover.style.backgroundImage = `url('/images/${pid}-0.png')`;
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  meta.textContent = PROJECT_TITLES[i];
-  tile.appendChild(cover);
-  tile.appendChild(meta);
-  tile.addEventListener('click', ()=> openGalleryFor(i));
-  grid.appendChild(tile);
-
-  // menu entry
-  const liBtn = document.createElement('button');
-  liBtn.textContent = PROJECT_TITLES[i];
-  liBtn.addEventListener('click', ()=> { openGalleryFor(i); toggleMenu(false); });
-  menuList.appendChild(liBtn);
-}
-
-/* ---------- menu behaviour ---------- */
-const menuBtn = document.getElementById('menuBtn');
-const menuOverlay = document.getElementById('menuOverlay');
-let menuOpen = false;
-menuBtn.addEventListener('click', ()=>{
-  // If gallery open, clicking button acts as back (close gallery)
-  if(isGalleryOpen()){
-    closeGallery();
-    return;
-  }
-  toggleMenu(!menuOpen);
-});
-function toggleMenu(show){
-  menuOpen = !!show;
-  menuOverlay.classList.toggle('open', menuOpen);
-  menuOverlay.setAttribute('aria-hidden', !menuOpen);
-}
-
-/* ---------- NEXT PROJECT button ---------- */
-const nextProjectBtn = document.getElementById('nextProjectBtn');
-nextProjectBtn.addEventListener('click', ()=>{
-  // find current (if gallery open, use that), otherwise advance selected index or first
-  const activeIndex = galleryState.openIndex ?? 0;
-  const next = (activeIndex + 1) % PROJECT_COUNT;
-  openGalleryFor(next);
-});
-
-/* ---------- BACK button (in gallery) ---------- */
-const backBtn = document.getElementById('backBtn');
-backBtn.addEventListener('click', ()=> {
-  // acts as back to main (close gallery)
-  if(isGalleryOpen()) closeGallery();
-});
-
-/* ========== background cycling (after hero scroll) ========== */
-const bgEls = [document.getElementById('bg0'),document.getElementById('bg1'),document.getElementById('bg2')];
-let bgIndex = 0, bgTimer = null, bgActive = false;
-const BG_INTERVAL = 180000; // 3 minutes
-const BG_FADE_MS = 500; // dissolve 500ms linear
-
-// apply css transition duration to each element for consistency
-bgEls.forEach(el => el.style.transition = `opacity ${BG_FADE_MS}ms linear`);
-
-function showBg(index){
-  bgEls.forEach((el,i)=> el.classList.toggle('visible', i===index));
-}
-function startBgCycle(){
-  if(bgActive) return;
-  bgActive = true;
-  // start with current index
-  showBg(bgIndex);
-  bgTimer = setInterval(()=>{
-    bgIndex = (bgIndex+1) % bgEls.length;
-    showBg(bgIndex);
-  }, BG_INTERVAL);
-  // preload images
-  bgEls.forEach(el => { const img = new Image(); img.src = el.style.backgroundImage.replace(/url\((['"]?)/,'').replace(/(['"]?)\)/,''); });
-}
-
-// Observe hero out of view
-const hero = document.getElementById('hero');
-const io = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(!e.isIntersecting){
-      startBgCycle();
-      io.disconnect();
-    }
-  });
-},{threshold:0.01});
-io.observe(hero);
-
-/* ---------- gallery logic ---------- */
-const modal = document.getElementById('modal');
-const modalImage = document.getElementById('modalImage');
-const modalTitle = document.getElementById('modalTitle');
-const counter = document.getElementById('counter');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-
-let galleryState = { open:false, pid:null, images:[], current:0, openIndex:null };
-
-function isGalleryOpen(){ return galleryState.open; }
-
-async function openGalleryFor(projectIndex){
-  // close menu if open
-  toggleMenu(false);
-
-  const idx = projectIndex;
-  const pid = `p${idx+1}`;
-  currentTitle.textContent = PROJECT_TITLES[idx];
-  menuBtn.querySelector('svg').setAttribute('aria-hidden','true'); // no change to icon itself but we'll swap function
-  // build list of images: include cover pX-0 then pX-1..pX-6 if exist
-  const urls = [];
-  const cover = `/images/${pid}-0.png`;
-  // test if cover exists, if not we still include (will 404)
-  urls.push(cover);
-
-  // test up to 6 additional images
-  for(let n=1;n<=6;n++){
-    const url = `/images/${pid}-${n}.png`;
-    const ok = await fileExists(url);
-    if(ok) urls.push(url);
+  function changeBackground() {
+    bg.style.opacity = 0;
+    setTimeout(() => {
+      bg.style.backgroundImage = `url(${backgrounds[index]})`;
+      bg.style.opacity = 1;
+      index = (index + 1) % backgrounds.length;
+    }, 300);
   }
 
-  // if only cover, still show it
-  galleryState = { open:true, pid, images:urls, current:0, openIndex: idx };
-
-  // swap menu icon into back arrow (visually we just keep same button but function handles back)
-  // open modal
-  modal.classList.add('open'); modal.parentElement.classList.add('open'); // backdrop
-  modal.parentElement.classList.toggle('open', true);
-  modal.parentElement.setAttribute('aria-hidden', 'false');
-  modal.style.display = 'flex';
-  showGalleryImage(0);
-
-  // clicking menu button while gallery open will call closeGallery() (handled above)
-}
-
-function closeGallery(){
-  galleryState = { open:false, pid:null, images:[], current:0, openIndex:null };
-  modal.parentElement.classList.remove('open');
-  modal.parentElement.setAttribute('aria-hidden','true');
-  modal.style.display = 'none';
-  currentTitle.textContent = 'EROS•MACHINE — Sélection';
-}
-
-/* show image by index */
-function showGalleryImage(i){
-  if(!galleryState.images.length) return;
-  galleryState.current = (i + galleryState.images.length) % galleryState.images.length;
-  modalImage.src = galleryState.images[galleryState.current];
-  modalTitle.textContent = PROJECT_TITLES[galleryState.openIndex] ?? galleryState.pid;
-  counter.textContent = `${galleryState.current + 1} / ${galleryState.images.length}`;
-}
-
-/* prev/next handlers */
-prevBtn.addEventListener('click', ()=> showGalleryImage(galleryState.current - 1));
-nextBtn.addEventListener('click', ()=> showGalleryImage(galleryState.current + 1));
-
-/* close when click backdrop */
-document.getElementById('modal').addEventListener('click', (e)=>{
-  if(e.target === document.getElementById('modal')) closeGallery();
-});
-/* keyboard navigation */
-window.addEventListener('keydown', (e)=>{
-  if(!galleryState.open) return;
-  if(e.key === 'ArrowLeft') prevBtn.click();
-  if(e.key === 'ArrowRight') nextBtn.click();
-  if(e.key === 'Escape') closeGallery();
-});
-
-/* ---------- small HEAD check function to ensure existing files included ---------- */
-async function fileExists(url){
-  try{
-    const res = await fetch(url, { method:'HEAD' });
-    return res.ok;
-  }catch(err){
-    // fetch HEAD might be blocked by CORS on some hosts, fallback to try fetching the image
-    try{
-      const r = await fetch(url, { method:'GET' });
-      return r.ok;
-    }catch(e){
-      return false;
-    }
-  }
-}
-
-/* ---------- ensure bgLayer only becomes visible after hero scroll by setting z-index and starting cycle (handled above) ---------- */
-/* ---------- ensure clicking anywhere on the page (outside hero) will not break interactions ---------- */
-
-/* Optional: lazy show covers by preloading very slightly when background activates */
-startBgCycleIfHeroScrolled = () => {
-  // (handled by IntersectionObserver)
-};
-
-/* Prevent form default to ensure mailto works in many clients but keep default behavior */
-document.getElementById('newsletter').addEventListener('submit', (e)=>{
-  // default action will open mail client; keep that, but for UX we can show an alert
-  setTimeout(()=> alert('Merci — votre message va être envoyé via votre client email.'), 200);
-});
+  bg.style.backgroundImage = `url(${backgrounds[0]})`;
+  setInterval(changeBackground, 180000); // every 3 minutes
 </script>
 </body>
 </html>

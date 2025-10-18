@@ -1,365 +1,198 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>EROS•MACHINE — Yellow-Pages style</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EROS•MACHINE</title>
 
-<!-- Fonts & Material Icons -->
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Material Design Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<style>
-  :root{
-    --fg:#fff;
-    --muted:#9a9a9a;
-    --accent:#ffd900;
-    --overlay: rgba(0,0,0,0.55);
-    --bg-fade: 500ms;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%; background:#000; color:var(--fg); font-family:'Open Sans',system-ui,-apple-system,Segoe UI,Roboto,Arial;}
-  a{color:inherit}
-  /* HERO */
-  .hero{height:100vh; display:grid; place-items:center; background:#000; position:relative; z-index:6}
-  .hero img{width:min(520px,42vw); max-width:86%; height:auto; display:block}
-  .scroll-hint{position:absolute; left:50%; bottom:18px; transform:translateX(-50%); color:var(--muted); font-size:13px}
+  <!-- Typography similar to eros-machine.gay -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
 
-  /* BACKGROUND LAYER (behind projects) */
-  .bg-layer{position:fixed; inset:0; z-index:0; pointer-events:none}
-  .bg-item{position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; transition:opacity var(--bg-fade) linear; will-change:opacity}
-  .bg-item.visible{opacity:1}
-  .bg-overlay{position:fixed; inset:0; z-index:1; background:var(--overlay); pointer-events:none}
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: black;
+      color: white;
+      font-family: 'Playfair Display', serif;
+      overflow-x: hidden;
+      scroll-snap-type: y mandatory;
+    }
 
-  /* CONTROLS */
-  .control-left{position:fixed; left:18px; bottom:18px; z-index:9}
-  .control-btn{width:56px;height:56px;border-radius:10px;display:grid;place-items:center;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.06);cursor:pointer}
-  .control-btn .material-icons{font-size:28px;color:var(--fg)}
-  .control-next{position:fixed; right:18px; top:18px; z-index:9; width:56px;height:56px;border-radius:10px;background:rgba(0,0,0,0.6);display:grid;place-items:center;border:1px solid rgba(255,255,255,0.06); cursor:pointer}
-  .control-next .material-icons{font-size:28px;color:var(--fg)}
+    /* Full-screen project blocks */
+    section {
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: start;
+      position: relative;
+    }
 
-  /* PROJECT SECTIONS - full viewport each */
-  main.sections{position:relative; z-index:2}
-  section.project{height:100vh; display:grid; place-items:center; padding:36px 6vw; color:var(--fg); position:relative}
-  .project-inner{width:min(1100px,86vw); display:grid; gap:18px; place-items:center}
-  .project-title{font-family:'Archivo Black',sans-serif;font-size:32px;text-align:center;letter-spacing:.02em;color:#fff}
-  @media(min-width:900px){ .project-title{font-size:42px} }
+    /* Intro block (logo) */
+    .intro {
+      background: black;
+    }
 
-  .cover{
-    width:min(72vw,920px);
-    height:min(66vh,740px);
-    background:#0a0a0a center/cover no-repeat;
-    border-radius:8px; box-shadow:0 28px 80px rgba(0,0,0,0.7);
-    display:block; cursor:pointer; border:1px solid rgba(255,255,255,0.02);
-  }
-  .cover-meta{margin-top:10px;font-weight:600;color:#eee;font-size:15px}
+    .intro img {
+      max-width: 300px;
+      height: auto;
+    }
 
-  /* MENU overlay */
-  .menu{position:fixed; left:18px; bottom:92px; z-index:10; width:min(360px,30vw); max-height:70vh; background:rgba(0,0,0,0.94); border:1px solid rgba(255,255,255,0.04); border-radius:10px; padding:12px; display:none; overflow:auto}
-  .menu.open{display:block}
-  .menu h4{color:var(--muted); font-size:13px; margin-bottom:8px; padding-left:6px}
-  .menu button{background:transparent;border:0;color:var(--fg); text-align:left;padding:10px 8px;border-radius:6px;cursor:pointer;font-weight:600}
-  .menu button:hover{background:rgba(255,255,255,0.03)}
+    /* Project images */
+    .project img {
+      max-height: 80vh;
+      width: auto;
+      object-fit: contain;
+    }
 
-  /* GALLERY MODAL */
-  .modal-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:12;padding:20px}
-  .modal-backdrop.open{display:flex}
-  .modal{width:min(1200px,96vw);max-height:92vh;background:#0a0a0a;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
-  .modal-main{flex:1;display:grid;place-items:center;background:#000}
-  .modal-main img{max-width:100%;max-height:78vh;object-fit:contain}
-  .modal-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-top:1px solid rgba(255,255,255,0.04);color:var(--muted)}
-  .modal-controls{display:flex;align-items:center;gap:8px}
-  .icon-square{width:44px;height:44px;border-radius:8px;display:grid;place-items:center;background:transparent;border:1px solid rgba(255,255,255,0.04);cursor:pointer;color:var(--fg)}
+    /* Last block text */
+    .outro {
+      background: black;
+      color: white;
+      text-align: center;
+      padding: 4rem;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
 
-  /* bottom block */
-  .bottom{background:#000;color:#ddd;padding:64px 6vw;text-align:center; font-size:16px; line-height:1.6}
-  .newsletter{margin-top:22px;display:flex;gap:8px;max-width:520px;margin-left:auto;margin-right:auto}
-  .newsletter input[type=email]{flex:1;padding:10px 12px;border-radius:6px;border:1px solid #222;background:#070707;color:var(--fg)}
-  .newsletter button{padding:10px 14px;border-radius:6px;background:transparent;border:1px solid #333;color:var(--fg);cursor:pointer}
+    /* Fixed Menu & Play Buttons */
+    .menu, .next {
+      position: fixed;
+      bottom: 10px;
+      font-size: 28px;
+      z-index: 20;
+      color: white;
+      cursor: pointer;
+    }
 
-  :focus{outline:2px solid rgba(255,255,255,0.08);outline-offset:3px}
-</style>
+    .menu { left: 20px; }
+    .next { right: 20px; }
+
+    /* Bottom bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      background-color: #9db5d3;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-family: 'Playfair Display', italic;
+      z-index: 10;
+      transition: background 0.3s linear;
+    }
+
+    .project-title {
+      opacity: 1;
+      transition: opacity 0.3s linear;
+    }
+
+    .fade-out {
+      opacity: 0;
+    }
+
+    /* Background slideshow */
+    .bg-slide {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 0.5s linear;
+      z-index: -1;
+    }
+
+    .bg-slide.active {
+      opacity: 1;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- HERO -->
-  <header class="hero" id="hero">
-    <img src="/logo.jpg" alt="EROS•MACHINE logo">
-    <div class="scroll-hint">Scroll ↓</div>
-  </header>
+  <!-- Background Slides -->
+  <div class="bg-slide active" style="background-image: url('/images/BG/bg1.jpg');"></div>
+  <div class="bg-slide" style="background-image: url('/images/BG/bg2.jpg');"></div>
+  <div class="bg-slide" style="background-image: url('/images/BG/bg3.jpg');"></div>
 
-  <!-- BACKGROUNDS (hidden until hero leaves view) -->
-  <div class="bg-layer" id="bgLayer" aria-hidden="true">
-    <div class="bg-item" id="bg1" style="background-image:url('/images/BG/bg1.jpg')"></div>
-    <div class="bg-item" id="bg2" style="background-image:url('/images/BG/bg2.jpg')"></div>
-    <div class="bg-item" id="bg3" style="background-image:url('/images/BG/bg3.jpg')"></div>
-  </div>
-  <div class="bg-overlay" aria-hidden="true"></div>
+  <!-- Fixed icons -->
+  <i class="material-icons menu">menu</i>
+  <i class="material-icons next">arrow_forward</i>
 
-  <!-- CONTROLS -->
-  <div class="control-left">
-    <button id="menuBtn" class="control-btn" aria-label="Menu"><span class="material-icons" id="menuIcon">menu</span></button>
-  </div>
-  <button id="nextBtn" class="control-next" aria-label="Next project"><span class="material-icons">chevron_right</span></button>
+  <!-- Intro block -->
+  <section class="intro">
+    <img src="/logo.jpg" alt="Logo">
+  </section>
 
-  <!-- MENU overlay -->
-  <nav id="menu" class="menu" aria-hidden="true"><h4>Projects</h4><!-- buttons inserted by JS --></nav>
+  <!-- Project sections -->
+  <section class="project"><img src="/images/p1-0.png" alt=""></section>
+  <section class="project"><img src="/images/p2-0.png" alt=""></section>
+  <section class="project"><img src="/images/p3-0.png" alt=""></section>
+  <section class="project"><img src="/images/p4-0.png" alt=""></section>
+  <section class="project"><img src="/images/p5-0.png" alt=""></section>
+  <section class="project"><img src="/images/p6-0.png" alt=""></section>
+  <section class="project"><img src="/images/p7-0.png" alt=""></section>
+  <section class="project"><img src="/images/p8-0.png" alt=""></section>
+  <section class="project"><img src="/images/p9-0.png" alt=""></section>
+  <section class="project"><img src="/images/p10-0.png" alt=""></section>
 
-  <!-- PROJECT SECTIONS (full-screen each) -->
-  <main class="sections" id="sections"></main>
+  <!-- Outro block -->
+  <section class="outro">
+    <p>EROS•MACHINE propose un ensemble d'éditions d'artistes réalisées de manières collectives ou individuelles. Nos publications déclinent des séries d'images, mêlant des vocabulaires abstraits à des références érotiques ou pornographiques. Nos éditions mettent en évidence, dans leur transparence, la circulation des désirs, leurs codes et leurs modes de représentations au sein de la culture queer.</p>
+  </section>
 
-  <!-- GALLERY MODAL -->
-  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal" role="document">
-      <div class="modal-main"><img id="modalImg" src="" alt=""/></div>
-      <div class="modal-bar">
-        <div style="display:flex;align-items:center;gap:10px">
-          <button id="modalBack" class="icon-square" title="Back"><span class="material-icons">arrow_back</span></button>
-          <div id="modalTitle" style="font-weight:700;color:#fff"></div>
-        </div>
-        <div class="modal-controls">
-          <button id="modalPrev" class="icon-square" title="Previous"><span class="material-icons">chevron_left</span></button>
-          <div id="modalCounter" style="color:var(--muted)">0 / 0</div>
-          <button id="modalNext" class="icon-square" title="Next"><span class="material-icons">chevron_right</span></button>
-        </div>
-      </div>
-    </div>
+  <!-- Fixed bottom bar -->
+  <div class="bottom-bar">
+    <span class="project-title">Salade jus.. I</span>
   </div>
 
-  <!-- BOTTOM block with text & newsletter -->
-  <footer class="bottom">
-EROS•MACHINE propose un ensemble d'éditions d'artistes réalisées de manières collectives ou individuelles. Nos publications déclinent des séries d'images, mêlant des vocabulaires abstraits à des références érotiques ou pornographiques. Nos éditions mettent en évidence, dans leur transparence, la circulation des désirs, leurs codes et leurs modes de représentations au sein de la culture queer.
-    <div class="newsletter">
-      <form id="newsletter" action="mailto:onecreationperday@gmail.com" method="POST" enctype="text/plain" style="display:flex; width:100%;">
-        <input type="email" name="email" placeholder="Votre email" required>
-        <button type="submit">S'abonner</button>
-      </form>
-    </div>
-  </footer>
+  <script>
+    const titles = [
+      "Salade jus.. I",
+      "Salade jus.. II",
+      "SOUL and SPIRIT of the male nude",
+      "Le cabinet d'amour",
+      "Alexandre notre fils",
+      "Skin on skin",
+      "Seriegraphie Thuan",
+      "Homage to Hockey",
+      "Glory Dizzimages #1",
+      "Chéri-graphie"
+    ];
 
-<script>
-/* ========== CONTENT ========== */
-const PROJECT_TITLES = [
-  "Salade jus.. I",
-  "Salade jus.. II",
-  "SOUL and SPIRIT of the male nude",
-  "Le cabinet d'amour",
-  "Alexandre notre fils",
-  "Skin on skin",
-  "Seriegraphie Thuan",
-  "Homage to Hockey",
-  "Glory",
-  "Dizzimages #1",
-  "Chéri-graphie"
-];
-const PROJECT_COUNT = PROJECT_TITLES.length;
-const IMAGES_BASE = '/images';                  // covers & gallery: /images/p{n}-0.png, p{n}-1.png ..
-const BG_PATHS = ['/images/BG/bg1.jpg','/images/BG/bg2.jpg','/images/BG/bg3.jpg'];
-const BG_INTERVAL = 180000; // 3 minutes
-const BG_FADE = 500; // ms
+    const sections = document.querySelectorAll(".project");
+    const titleEl = document.querySelector(".project-title");
 
-/* ========== BUILD sections + menu ========== */
-const sections = document.getElementById('sections');
-const menu = document.getElementById('menu');
-for(let i=0;i<PROJECT_COUNT;i++){
-  const idx = i+1;
-  const pid = `p${idx}`;
+    // Update title on scroll
+    window.addEventListener("scroll", () => {
+      let index = Math.floor(window.scrollY / window.innerHeight) - 1;
+      if (index >= 0 && index < titles.length) {
+        titleEl.classList.add("fade-out");
+        setTimeout(() => {
+          titleEl.textContent = titles[index];
+          titleEl.classList.remove("fade-out");
+        }, 300);
+      }
+    });
 
-  // section
-  const s = document.createElement('section');
-  s.className = 'project';
-  s.id = `section-${pid}`;
-  s.dataset.index = i;
+    // Background slideshow rotation
+    const slides = document.querySelectorAll(".bg-slide");
+    let currentSlide = 0;
 
-  const inner = document.createElement('div');
-  inner.className = 'project-inner';
-
-  const title = document.createElement('div');
-  title.className = 'project-title';
-  title.textContent = PROJECT_TITLES[i];
-
-  const cover = document.createElement('div');
-  cover.className = 'cover';
-  cover.style.backgroundImage = `url('${IMAGES_BASE}/${pid}-0.png')`;
-  cover.tabIndex = 0;
-  cover.setAttribute('role','button');
-  cover.setAttribute('aria-label', PROJECT_TITLES[i]);
-  cover.addEventListener('click', ()=> openGallery(i));
-  cover.addEventListener('keydown', (e)=> { if(e.key==='Enter' || e.key===' ') openGallery(i); });
-
-  const meta = document.createElement('div');
-  meta.className = 'cover-meta';
-  meta.textContent = PROJECT_TITLES[i];
-
-  inner.appendChild(title);
-  inner.appendChild(cover);
-  inner.appendChild(meta);
-  s.appendChild(inner);
-  sections.appendChild(s);
-
-  // menu entry
-  const btn = document.createElement('button');
-  btn.textContent = PROJECT_TITLES[i];
-  btn.addEventListener('click', ()=> { scrollToProject(i); toggleMenu(false); });
-  menu.appendChild(btn);
-}
-
-/* ========== BACKGROUND cycling (start when hero leaves) ========== */
-const bgItems = [document.getElementById('bg1'), document.getElementById('bg2'), document.getElementById('bg3')];
-bgItems.forEach(it => it.style.transition = `opacity ${BG_FADE}ms linear`);
-BG_PATHS.forEach(p => { const img=new Image(); img.src=p; });
-
-let bgIndex = 0, bgTimer = null, bgActive=false;
-function showBg(i){
-  bgItems.forEach((el, j)=> el.classList.toggle('visible', j===i));
-}
-function startBgCycle(){
-  if(bgActive) return;
-  bgActive = true;
-  showBg(bgIndex);
-  bgTimer = setInterval(()=> {
-    bgIndex = (bgIndex+1) % bgItems.length;
-    showBg(bgIndex);
-  }, BG_INTERVAL);
-}
-
-/* start when hero leaves view */
-const hero = document.getElementById('hero');
-const heroObserver = new IntersectionObserver((entries)=>{
-  entries.forEach(en => {
-    if(!en.isIntersecting){
-      startBgCycle();
-      heroObserver.disconnect();
-    }
-  });
-},{threshold:0.02});
-heroObserver.observe(hero);
-
-/* ========== CONTROLS: menu button & next project ========== */
-const menuBtn = document.getElementById('menuBtn');
-const menuIcon = document.getElementById('menuIcon');
-let menuOpen = false;
-menuBtn.addEventListener('click', ()=> {
-  // if gallery open act as back
-  if(gallery.open) { closeGallery(); return; }
-  toggleMenu(!menuOpen);
-});
-function toggleMenu(state){
-  menuOpen = !!state;
-  menu.classList.toggle('open', menuOpen);
-  menu.setAttribute('aria-hidden', String(!menuOpen));
-  menuBtn.setAttribute('aria-pressed', String(menuOpen));
-}
-
-const nextBtn = document.getElementById('nextBtn');
-nextBtn.addEventListener('click', ()=>{
-  // scroll to next project relative to current viewport
-  const cur = currentProjectIndex();
-  const next = (cur === null) ? 0 : Math.min(PROJECT_COUNT-1, cur + 1);
-  scrollToProject(next);
-});
-function currentProjectIndex(){
-  const secs = Array.from(document.querySelectorAll('section.project'));
-  for(let i=0;i<secs.length;i++){
-    const r = secs[i].getBoundingClientRect();
-    if(r.top >= -10 && r.top < window.innerHeight*0.6) return i;
-  }
-  return null;
-}
-function scrollToProject(i){
-  const s = document.querySelectorAll('section.project')[i];
-  if(s) s.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-/* ========== GALLERY modal ========== */
-const modalBackdrop = document.getElementById('modalBackdrop');
-const modalImg = document.getElementById('modalImg');
-const modalTitle = document.getElementById('modalTitle');
-const modalCounter = document.getElementById('modalCounter');
-const modalPrev = document.getElementById('modalPrev');
-const modalNext = document.getElementById('modalNext');
-const modalBack = document.getElementById('modalBack');
-
-let gallery = { open:false, projectIndex:null, images:[], idx:0 };
-
-async function openGallery(projectIndex){
-  toggleMenu(false);
-  const idx = projectIndex;
-  const pid = `p${idx+1}`;
-  // build images: cover then up to 6 detail images if they exist
-  const images = [];
-  images.push(`${IMAGES_BASE}/${pid}-0.png`);
-  for(let n=1;n<=6;n++){
-    const url = `${IMAGES_BASE}/${pid}-${n}.png`;
-    if(await fileExists(url)) images.push(url);
-  }
-  gallery = { open:true, projectIndex:idx, images, idx:0 };
-  showGallery();
-}
-function showGallery(){
-  if(!gallery.open) return;
-  modalBackdrop.classList.add('open');
-  modalBackdrop.setAttribute('aria-hidden','false');
-  modalImg.src = gallery.images[gallery.idx] || '';
-  modalTitle.textContent = PROJECT_TITLES[gallery.projectIndex] || '';
-  modalCounter.textContent = `${gallery.idx+1} / ${gallery.images.length}`;
-  // change menu icon into back arrow
-  menuIcon.textContent = 'arrow_back';
-}
-function closeGallery(){
-  gallery = { open:false, projectIndex:null, images:[], idx:0 };
-  modalBackdrop.classList.remove('open');
-  modalBackdrop.setAttribute('aria-hidden','true');
-  modalImg.src = '';
-  modalTitle.textContent = '';
-  modalCounter.textContent = '0 / 0';
-  menuIcon.textContent = 'menu';
-}
-modalPrev.addEventListener('click', ()=> {
-  if(!gallery.open) return;
-  gallery.idx = (gallery.idx - 1 + gallery.images.length) % gallery.images.length;
-  showGallery();
-});
-modalNext.addEventListener('click', ()=> {
-  if(!gallery.open) return;
-  gallery.idx = (gallery.idx + 1) % gallery.images.length;
-  showGallery();
-});
-modalBack.addEventListener('click', ()=> closeGallery());
-modalBackdrop.addEventListener('click', (e)=> { if(e.target === modalBackdrop) closeGallery(); });
-window.addEventListener('keydown', (e)=> {
-  if(!gallery.open) return;
-  if(e.key === 'ArrowLeft') modalPrev.click();
-  if(e.key === 'ArrowRight') modalNext.click();
-  if(e.key === 'Escape') closeGallery();
-});
-
-/* fileExists HEAD check (fallback to GET) */
-async function fileExists(url){
-  try{
-    const res = await fetch(url, {method:'HEAD'});
-    return res.ok;
-  }catch(err){
-    try{
-      const r = await fetch(url, {method:'GET'});
-      return r.ok;
-    }catch(e){
-      return false;
-    }
-  }
-}
-
-/* NEWSLETTER UX */
-const newsletter = document.getElementById('newsletter');
-newsletter.addEventListener('submit', (e)=> {
-  // keep default mailto but present small confirmation for UX
-  setTimeout(()=> alert('Merci — votre client email va s\'ouvrir.'), 200);
-});
-
-/* Accessibility: ensure menu closes on resize/scroll away */
-window.addEventListener('resize', ()=> toggleMenu(false));
-
-/* End of script */
-</script>
+    setInterval(() => {
+      slides[currentSlide].classList.remove("active");
+      currentSlide = (currentSlide + 1) % slides.length;
+      slides[currentSlide].classList.add("active");
+    }, 180000); // every 3 minutes
+  </script>
 </body>
 </html>

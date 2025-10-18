@@ -1,286 +1,434 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Eros Machine édition</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EROS•MACHINE — Single file</title>
 <style>
   :root{
-    --fg:#f7f7f7;
-    --ink:#000;
-    --yel:#ffd900;
-    --yel-2:#ffe24d;
-    --muted:#b3b3b3;
-    --grid-gap:14px;
-    --side-w: 320px;
+    --bg-overlay: rgba(0,0,0,0.6);
+    --fg: #fff;
+    --muted: #9a9a9a;
+    --accent: #ffd900;
     --radius: 10px;
-    --overlay: rgba(0,0,0,0.65);
-    --overlay-2: rgba(0,0,0,0.55);
   }
-  html,body{height:100%;}
-  body{
-    margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    color:var(--fg);
-    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-    background-color:#000; /* first screen is pure black */
-    background-size:cover; background-position:center; background-repeat:no-repeat;
-  }
+  html,body{height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Helvetica Neue", Arial; color:var(--fg); background:#000;}
   a{color:inherit; text-decoration:none}
 
-  /* Dissolve background transition */
-  body.bg-fade{
-    transition: background-image 0.3s linear;
+  /* ---------- hero (first, fixed black with logo) ---------- */
+  .hero{
+    height:100vh; width:100%;
+    display:grid; place-items:center;
+    background:#000;
+    position:relative;
+    z-index:6;
+  }
+  .hero img{ width:min(480px, 42vw); max-width:82%; height:auto; display:block; }
+
+  .scroll-hint{ position:absolute; left:50%; bottom:18px; transform:translateX(-50%); color:var(--muted); font-size:13px; z-index:7; }
+
+  /* ---------- background layer (appears after hero) ---------- */
+  .bg-layer{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+  .bg-item{
+    position:absolute; inset:0; background-size:cover; background-position:center; opacity:0;
+    transition: opacity 500ms linear;
+    will-change:opacity;
+  }
+  .bg-item.visible{ opacity:1; }
+
+  /* Dark overlay on top of backgrounds so content reads well */
+  .bg-overlay{
+    position:fixed; inset:0; background:var(--bg-overlay); z-index:1; pointer-events:none;
   }
 
-  /* ————— first slide (full-screen, black, centered logo) ————— */
-  .intro{ height:100dvh; display:grid; place-items:center; background:#000; position:relative; }
-  .intro-logo{ width:min(42vw, 520px); max-width:80%; height:auto; image-rendering:auto; }
-  .scroll-hint{ position:absolute; bottom:22px; left:50%; transform:translateX(-50%); font-size:14px; color:#9a9a9a; letter-spacing:.06em }
-
-  /* ————— app layout (below the fold) ————— */
-  .app{display:grid; grid-template-columns: var(--side-w) 1fr; min-height:100dvh; background-color: var(--overlay)}
-
-  /* ————— left column ————— */
-  .side{
-    position:sticky; top:0; align-self:start; height:100dvh;
-    display:flex; flex-direction:column; gap:18px; padding:24px 18px; border-right:1px solid #1c1c1c;
-    background: rgba(0,0,0,0.78);
-    backdrop-filter: blur(2px);
+  /* ---------- main app layout (below hero) ---------- */
+  .app-wrap{ position:relative; z-index:4; padding:48px 28px; background:transparent; margin-top:-4px; }
+  .container{ max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 68px 1fr; gap:20px; align-items:start; }
+  /* left column controls */
+  .left-col{ position:sticky; top:24px; height:calc(100vh - 48px); align-self:start; display:flex; flex-direction:column; gap:12px; z-index:5; }
+  .icon-btn{
+    width:56px; height:56px; border-radius:12px; background:rgba(0,0,0,0.45); border:1px solid #111; display:grid; place-items:center; cursor:pointer;
   }
-  .brand{display:flex; align-items:baseline; gap:10px}
-  .brand h1{font-size:24px; letter-spacing:.2px; margin:0; font-weight:700}
-  .brand .dot{width:14px; height:14px; border-radius:50%; background:var(--yel); box-shadow:0 0 0 2px #111 inset}
-  .side .actions{display:flex; gap:12px; flex-wrap:wrap}
-  .btn{background:#151515; border:1px solid #222; padding:8px 12px; border-radius:8px; font-size:14px}
-  .btn:hover{border-color:#2b2b2b; background:#171717}
-  .about-btn{background:transparent; border:1px solid #333}
-  .list{margin:0; padding:0; list-style:none; overflow:auto; scrollbar-gutter:stable;}
-  .list li{border-bottom:1px solid #151515}
-  .list a{display:flex; justify-content:space-between; gap:10px; padding:12px 6px; color:#d8d8d8}
-  .list a span.title{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .list a span.year{color:#848484}
-  .list a:focus-visible, .list a:hover{color:#fff}
-  footer{margin-top:auto; font-size:12px; color:#8a8a8a}
-  footer a{color:#bdbdbd; text-decoration:underline}
+  .icon-btn svg{ width:28px; height:28px; fill:var(--fg); }
 
-  /* ————— right column (grid) ————— */
-  .grid-wrap{padding:24px; background: var(--overlay-2)}
-  .grid{ display:grid; gap:var(--grid-gap); grid-template-columns: repeat(12, 1fr); }
-  @media (max-width: 1400px){ .grid{grid-template-columns: repeat(10,1fr);} }
-  @media (max-width: 1200px){ .grid{grid-template-columns: repeat(8,1fr);} }
-  @media (max-width: 1024px){ .grid{grid-template-columns: repeat(6,1fr);} .app{grid-template-columns: 280px 1fr} }
-  @media (max-width: 860px){ .grid{grid-template-columns: repeat(4,1fr);} .app{grid-template-columns: 1fr} .side{position:relative; height:auto} }
-  @media (max-width: 520px){ .grid{grid-template-columns: repeat(2,1fr);} }
+  /* center area: project title + grid */
+  .center{ padding:8px 0; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+  .project-title{ font-weight:700; font-size:20px; text-align:center; flex:1; }
+  .right-icon{ width:42px; height:42px; display:grid; place-items:center; border-radius:10px; background:rgba(0,0,0,0.45); border:1px solid #111; cursor:pointer; }
+  .right-icon svg{ width:22px;height:22px; fill:var(--fg); }
+
+  /* grid of covers */
+  .grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; }
+  @media (max-width:900px){ .container{ grid-template-columns: 52px 1fr } .grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width:520px){ .container{ grid-template-columns: 48px 1fr } .grid{ grid-template-columns: 1fr; } }
 
   .tile{
-    grid-column: span 4; aspect-ratio: 1 / 1.2; background:var(--yel); color:var(--ink);
-    border-radius: var(--radius); border:1px solid #00000024; box-shadow: 0 2px 0 #00000055;
-    display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden; position:relative;
-    transition: transform .08s ease, box-shadow .08s ease, background .15s ease;
+    position:relative; border-radius:12px; overflow:hidden; min-height:220px; background:#111; box-shadow:0 6px 24px rgba(0,0,0,0.6);
+    display:flex; align-items:flex-end; justify-content:flex-start; cursor:pointer;
   }
-  .tile:hover{ transform: translateY(-2px); box-shadow:0 4px 0 #00000066; background:var(--yel-2)}
-  .tile .cover{position:absolute; inset:0; background-size:cover; background-position:center; filter:saturate(1) contrast(1.02)}
-  .tile .meta{position:relative; z-index:1; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; background:#00000066; color:#fff}
-  .tile .meta .t{font-weight:600; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .tile .meta .p{font-variant-numeric: tabular-nums}
-  .tile:focus-visible{outline:3px solid #fff}
+  .tile .cover{ position:absolute; inset:0; background-size:cover; background-position:center; filter:contrast(1.02) saturate(1); }
+  .tile .meta{ position:relative; z-index:2; padding:12px 14px; background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%); width:100%; color:#fff; font-weight:600; }
 
-  /* Modal (About + Gallery share same styling) */
-  .modal-backdrop{position:fixed; inset:0; background:#000000a6; display:none; align-items:center; justify-content:center; padding:20px;}
-  .modal{max-width:960px; width:min(96vw, 960px); background:#0f0f0f; border:1px solid #222; border-radius:14px; box-shadow:0 12px 40px #000000b0}
-  .modal header{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid #1b1b1b}
-  .modal header h2{margin:0; font-size:18px}
-  .modal .content{padding:14px; line-height:1.5; color:#d6d6d6}
-  .modal .content p{margin:.6em 0}
-  .modal .content .hint{color:#9a9a9a; font-size:14px}
-  .modal .close{background:#151515; border:1px solid #2a2a2a; padding:6px 10px; border-radius:8px}
-  .modal .close:hover{background:#191919}
-  .modal-backdrop[aria-hidden="false"]{display:flex}
+  /* menu overlay (project list) */
+  .menu-overlay{ position:fixed; left:18px; bottom:24px; z-index:8; max-width:360px; background:rgba(0,0,0,0.9); border:1px solid #111; border-radius:10px; padding:12px; display:none; }
+  .menu-overlay.open{ display:block; }
+  .menu-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; }
+  .menu-list button{ text-align:left; padding:8px 10px; background:transparent; border:none; color:var(--fg); font-weight:600; cursor:pointer; border-radius:6px; }
+  .menu-list button:hover{ background:rgba(255,255,255,0.03); }
 
-  /* Gallery */
-  .gallery{background:#0a0a0a}
-  .gallery main{ position:relative; }
-  .gallery img{ width:100%; height:auto; display:block; max-height:76vh; object-fit:contain; background:#000 }
-  .gallery .bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border-top:1px solid #1b1b1b; color:#cfcfcf }
-  .gallery .nav{ display:flex; gap:8px }
-  .icon-btn{ background:#151515; border:1px solid #2a2a2a; padding:6px 10px; border-radius:8px }
-  .icon-btn:hover{ background:#191919 }
+  /* gallery modal */
+  .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:12; background:rgba(0,0,0,0.85); padding:20px; }
+  .modal-backdrop.open{ display:flex; }
+  .modal{ width:min(92vw,1100px); max-height:92vh; background:#0a0a0a; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+  .modal .viewer{ flex:1; display:grid; place-items:center; background:#000; }
+  .modal img{ max-width:100%; max-height:76vh; object-fit:contain; display:block; }
+  .modal .bar{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-top:1px solid #111; }
+  .nav-btn{ background:transparent; border:none; padding:8px; cursor:pointer; border-radius:8px; color:var(--fg); }
+  .small-icon{ width:28px; height:28px; vertical-align:middle; fill:var(--fg); }
 
-  *:focus-visible{outline:2px solid #ffffffcc; outline-offset:2px}
+  /* bottom text block (black block) */
+  .bottom-block{ background:#000; padding:64px 24px; color:var(--fg); text-align:left; }
+  .bottom-block .inner{ max-width:1100px; margin:0 auto; font-size:15px; line-height:1.55; color:#ddd; }
+
+  /* newsletter */
+  .newsletter{ margin-top:18px; display:flex; gap:8px; max-width:520px; }
+  .newsletter input[type="email"]{ flex:1; padding:10px 12px; border-radius:6px; border:1px solid #222; background:#0b0b0b; color:var(--fg); }
+  .newsletter button{ padding:10px 14px; border-radius:6px; background:transparent; border:1px solid #333; color:var(--fg); cursor:pointer; }
+
+  /* accessibility focus */
+  :focus{ outline:2px solid rgba(255,255,255,0.12); outline-offset:2px; }
+
+  /* small helpers */
+  .muted{ color:var(--muted); font-size:13px; }
 </style>
 </head>
-<body class="bg-fade">
-  <!-- First slide / hero -->
-  <section class="intro" id="intro">
-    <img src="/photos/logo.png" alt="Logo" class="intro-logo" />
+<body>
+
+  <!-- HERO: full black with logo -->
+  <section class="hero" id="hero">
+    <img src="/logo.jpg" alt="EROS MACHINE logo" />
     <div class="scroll-hint">Scroll ↓</div>
   </section>
 
-  <!-- Main app (appears after scrolling past the intro) -->
-  <div class="app" id="appRoot">
-    <aside class="side">
-      <div class="brand" aria-label="site brand">
-        <div class="dot" aria-hidden="true"></div>
-        <h1>Yellow Pages</h1>
-      </div>
-      <div class="actions">
-        <button class="btn" id="playBtn" type="button" title="Little interaction">Play</button>
-        <button class="btn about-btn" id="aboutBtn" type="button">About</button>
-      </div>
-
-      <ul class="list" id="titleList" aria-label="Titles">
-        <!-- Filled from /data/projects.json if present; else defaults -->
-      </ul>
-
-      <footer>
-        <div style="margin-top:10px">Drop images in <code>/photos</code>. Optional text data in <code>/data/projects.json</code> and <code>/data/backgrounds.json</code>.</div>
-      </footer>
-    </aside>
-
-    <main class="grid-wrap">
-      <section class="grid" id="grid">
-        <!-- Auto-generated tiles -->
-      </section>
-    </main>
+  <!-- Background layer (hidden while hero visible). Each bg-item is toggled with .visible for dissolve -->
+  <div class="bg-layer" id="bgLayer" aria-hidden="true">
+    <div class="bg-item" id="bg0" style="background-image:url('/images/BG/bg1.jpg')"></div>
+    <div class="bg-item" id="bg1" style="background-image:url('/images/BG/bg2.jpg')"></div>
+    <div class="bg-item" id="bg2" style="background-image:url('/images/BG/bg3.jpg')"></div>
   </div>
+  <div class="bg-overlay" aria-hidden="true"></div>
 
-  <!-- About modal -->
-  <div class="modal-backdrop" id="aboutModal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal" role="document">
-      <header>
-        <h2>About</h2>
-        <button class="close" type="button" data-close>OK</button>
-      </header>
-      <div class="content">
-        <p>First screen shows a pure black background with your <code>logo.png</code>. After you scroll, the background rotates through <code>BG1.jpg</code>, <code>BG2.jpg</code>, <code>BG3.jpg</code> every 3 minutes. Up to 12 projects supported. Each project uses a cover <code>Pxx-0.png</code> plus up to five additional images (<code>Pxx-1.png</code> … <code>Pxx-5.png</code>).</p>
-        <p>All images in <code>/photos</code>. Optional data overrides in <code>/data/projects.json</code> and <code>/data/backgrounds.json</code>.</p>
+  <!-- MAIN CONTENT (below hero) -->
+  <div class="app-wrap" id="appWrap">
+    <div class="container">
+
+      <!-- left column: menu / back button -->
+      <div class="left-col">
+        <div id="menuBtn" class="icon-btn" title="Menu" aria-label="Menu">
+          <!-- Material menu icon -->
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+        </div>
+
+        <!-- menu overlay -->
+        <div class="menu-overlay" id="menuOverlay" aria-hidden="true">
+          <div class="muted" style="padding:6px 8px 10px 8px">Projects</div>
+          <ul class="menu-list" id="menuList" role="list"></ul>
+        </div>
+      </div>
+
+      <!-- center column -->
+      <div class="center">
+        <div class="topbar">
+          <div style="width:56px"></div>
+          <div class="project-title" id="currentTitle">EROS•MACHINE — Sélection</div>
+          <div id="nextProjectBtn" class="right-icon" title="Next project" aria-label="Next">
+            <!-- Material chevron_right -->
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6l6 6-6 6V6z"/></svg>
+          </div>
+        </div>
+
+        <!-- grid of project covers -->
+        <div class="grid" id="grid"></div>
       </div>
     </div>
   </div>
 
-  <!-- Gallery modal -->
-  <div class="modal-backdrop" id="galleryModal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal gallery" role="document">
-      <header>
-        <h2 id="galleryTitle">Gallery</h2>
-        <button class="close" type="button" data-close>Close</button>
-      </header>
-      <main>
-        <img id="galleryImage" alt="Project image" loading="eager" />
-      </main>
+  <!-- gallery modal -->
+  <div class="modal-backdrop" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal" role="document" aria-live="polite">
+      <div class="viewer">
+        <img id="modalImage" alt="Project image" src="" />
+      </div>
       <div class="bar">
-        <div id="galleryCounter">1 / 1</div>
-        <div class="nav">
-          <button class="icon-btn" id="prevBtn" type="button" aria-label="Previous">◀</button>
-          <button class="icon-btn" id="nextBtn" type="button" aria-label="Next">▶</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <!-- back / menu toggles here -->
+          <button id="backBtn" class="nav-btn" title="Back">
+            <!-- left arrow (material) -->
+            <svg class="small-icon" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          </button>
+          <div id="modalTitle" style="font-weight:700;"></div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button id="prevBtn" class="nav-btn" title="Previous image">
+            <!-- chevron_left -->
+            <svg class="small-icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <div id="counter" class="muted">0 / 0</div>
+          <button id="nextBtn" class="nav-btn" title="Next image">
+            <!-- chevron_right -->
+            <svg class="small-icon" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- bottom block: text + newsletter -->
+  <section class="bottom-block" id="bottom">
+    <div class="inner">
+      <p>
+EROS•MACHINE propose un ensemble d'éditions d'artistes réalisées de manières collectives ou individuelles. Nos publications déclinent des séries d'images, mêlant des vocabulaires abstraits à des références érotiques ou pornographiques. Nos éditions mettent en évidence, dans leur transparence, la circulation des désirs, leurs codes et leurs modes de représentations au sein de la culture queer.
+      </p>
+
+      <div style="margin-top:22px">
+        <form id="newsletter" class="newsletter" action="mailto:onecreationperday@gmail.com" method="POST" enctype="text/plain">
+          <input type="email" name="email" placeholder="Votre email" required />
+          <button type="submit">S'abonner</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
 <script>
-  async function loadJSON(url, fallback){
-    try{
-      const r = await fetch(url, {cache:'no-store'});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return await r.json();
-    }catch(e){ return fallback; }
+/* ---------- data (project titles) ---------- */
+const PROJECT_TITLES = [
+  "Salade jus.. I",
+  "Salade jus.. II",
+  "SOUL and SPIRIT of the male nude",
+  "Le cabinet d'amour",
+  "Alexandre notre enfant",
+  "Skin on skin",
+  "Seriegraphie Thuan",
+  "Homage to Hockey",
+  "Glory",
+  "Dizzimages #1",
+  "Chéri-graphie"
+];
+const PROJECT_COUNT = PROJECT_TITLES.length;
+
+/* ---------- helper: create covers grid ---------- */
+const grid = document.getElementById('grid');
+const menuList = document.getElementById('menuList');
+const currentTitle = document.getElementById('currentTitle');
+
+for(let i=0;i<PROJECT_COUNT;i++){
+  const idx = i+1;
+  const pid = `p${idx}`;
+  // tile element
+  const tile = document.createElement('div');
+  tile.className = 'tile';
+  tile.dataset.pid = pid;
+  tile.dataset.index = i;
+  const cover = document.createElement('div');
+  cover.className = 'cover';
+  cover.style.backgroundImage = `url('/images/${pid}-0.png')`;
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  meta.textContent = PROJECT_TITLES[i];
+  tile.appendChild(cover);
+  tile.appendChild(meta);
+  tile.addEventListener('click', ()=> openGalleryFor(i));
+  grid.appendChild(tile);
+
+  // menu entry
+  const liBtn = document.createElement('button');
+  liBtn.textContent = PROJECT_TITLES[i];
+  liBtn.addEventListener('click', ()=> { openGalleryFor(i); toggleMenu(false); });
+  menuList.appendChild(liBtn);
+}
+
+/* ---------- menu behaviour ---------- */
+const menuBtn = document.getElementById('menuBtn');
+const menuOverlay = document.getElementById('menuOverlay');
+let menuOpen = false;
+menuBtn.addEventListener('click', ()=>{
+  // If gallery open, clicking button acts as back (close gallery)
+  if(isGalleryOpen()){
+    closeGallery();
+    return;
   }
+  toggleMenu(!menuOpen);
+});
+function toggleMenu(show){
+  menuOpen = !!show;
+  menuOverlay.classList.toggle('open', menuOpen);
+  menuOverlay.setAttribute('aria-hidden', !menuOpen);
+}
 
-  const DEFAULT_BACKGROUNDS = [
-    '/photos/BG1.jpg',
-    '/photos/BG2.jpg',
-    '/photos/BG3.jpg'
-  ];
-  let backgrounds = DEFAULT_BACKGROUNDS.slice();
-  let bgIndex = 0;
-  let bgActivated = false;
-  let bgTimer = null;
+/* ---------- NEXT PROJECT button ---------- */
+const nextProjectBtn = document.getElementById('nextProjectBtn');
+nextProjectBtn.addEventListener('click', ()=>{
+  // find current (if gallery open, use that), otherwise advance selected index or first
+  const activeIndex = galleryState.openIndex ?? 0;
+  const next = (activeIndex + 1) % PROJECT_COUNT;
+  openGalleryFor(next);
+});
 
-  function applyBackground(){
-    document.body.style.backgroundImage = `url('${backgrounds[bgIndex]}')`;
-    bgIndex = (bgIndex+1)%backgrounds.length;
-  }
-  function preload(srcs){ srcs.forEach(src=>{ const i=new Image(); i.src=src; }); }
-  function activateBackgrounds(){
-    if(bgActivated) return;
-    bgActivated = true;
-    preload(backgrounds);
-    applyBackground();
-    bgTimer = setInterval(applyBackground, 180000);
-  }
+/* ---------- BACK button (in gallery) ---------- */
+const backBtn = document.getElementById('backBtn');
+backBtn.addEventListener('click', ()=> {
+  // acts as back to main (close gallery)
+  if(isGalleryOpen()) closeGallery();
+});
 
-  const intro = document.getElementById('intro');
-  const observer = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(!e.isIntersecting){
-        activateBackgrounds();
-        observer.disconnect();
-      }
-    });
-  }, { threshold: 0.01 });
-  observer.observe(intro);
+/* ========== background cycling (after hero scroll) ========== */
+const bgEls = [document.getElementById('bg0'),document.getElementById('bg1'),document.getElementById('bg2')];
+let bgIndex = 0, bgTimer = null, bgActive = false;
+const BG_INTERVAL = 180000; // 3 minutes
+const BG_FADE_MS = 500; // dissolve 500ms linear
 
-  const DEFAULT_PROJECTS = Array.from({length:12}).map((_,i)=>{
-    const idx = (i+1).toString().padStart(2,'0');
-    return { id:`P${idx}`, title:`Project ${idx}`, price:"", year:"", maxImages:6 };
+// apply css transition duration to each element for consistency
+bgEls.forEach(el => el.style.transition = `opacity ${BG_FADE_MS}ms linear`);
+
+function showBg(index){
+  bgEls.forEach((el,i)=> el.classList.toggle('visible', i===index));
+}
+function startBgCycle(){
+  if(bgActive) return;
+  bgActive = true;
+  // start with current index
+  showBg(bgIndex);
+  bgTimer = setInterval(()=>{
+    bgIndex = (bgIndex+1) % bgEls.length;
+    showBg(bgIndex);
+  }, BG_INTERVAL);
+  // preload images
+  bgEls.forEach(el => { const img = new Image(); img.src = el.style.backgroundImage.replace(/url\((['"]?)/,'').replace(/(['"]?)\)/,''); });
+}
+
+// Observe hero out of view
+const hero = document.getElementById('hero');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting){
+      startBgCycle();
+      io.disconnect();
+    }
   });
-  let PROJECTS = DEFAULT_PROJECTS.slice();
+},{threshold:0.01});
+io.observe(hero);
 
-  const list = document.getElementById('titleList');
-  const grid = document.getElementById('grid');
+/* ---------- gallery logic ---------- */
+const modal = document.getElementById('modal');
+const modalImage = document.getElementById('modalImage');
+const modalTitle = document.getElementById('modalTitle');
+const counter = document.getElementById('counter');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
 
-  function render(){
-    list.innerHTML = '';
-    grid.innerHTML = '';
+let galleryState = { open:false, pid:null, images:[], current:0, openIndex:null };
 
-    PROJECTS.forEach(p=>{
-      const li = document.createElement('li');
-      const year = p.year ? String(p.year) : '';
-      li.innerHTML = `<a href="#${p.id}"><span class="title">${escapeHTML(p.title||p.id)}</span><span class="year">${year}</span></a>`;
-      list.appendChild(li);
+function isGalleryOpen(){ return galleryState.open; }
 
-      const a = document.createElement('a');
-      a.id = p.id; a.className = 'tile'; a.href = 'javascript:void(0)'; a.setAttribute('data-proj', p.id);
+async function openGalleryFor(projectIndex){
+  // close menu if open
+  toggleMenu(false);
 
-      const cover = document.createElement('div');
-      cover.className = 'cover';
-      cover.style.backgroundImage = `url('/photos/${p.id}-0.png')`;
+  const idx = projectIndex;
+  const pid = `p${idx+1}`;
+  currentTitle.textContent = PROJECT_TITLES[idx];
+  menuBtn.querySelector('svg').setAttribute('aria-hidden','true'); // no change to icon itself but we'll swap function
+  // build list of images: include cover pX-0 then pX-1..pX-6 if exist
+  const urls = [];
+  const cover = `/images/${pid}-0.png`;
+  // test if cover exists, if not we still include (will 404)
+  urls.push(cover);
 
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const price = p.price ? `<span class="p">${escapeHTML(p.price)}</span>` : '<span class="p"></span>';
-      meta.innerHTML = `<span class="t">${escapeHTML(p.title||p.id)}</span>${price}`;
-
-      a.appendChild(cover); a.appendChild(meta); grid.appendChild(a);
-    });
+  // test up to 6 additional images
+  for(let n=1;n<=6;n++){
+    const url = `/images/${pid}-${n}.png`;
+    const ok = await fileExists(url);
+    if(ok) urls.push(url);
   }
 
-  function escapeHTML(s){ return s?.replace(/[&<>\"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])) || ''; }
+  // if only cover, still show it
+  galleryState = { open:true, pid, images:urls, current:0, openIndex: idx };
 
-  const galleryModal = document.getElementById('galleryModal');
-  const galleryImage = document.getElementById('galleryImage');
-  const galleryTitle = document.getElementById('galleryTitle');
-  const galleryCounter = document.getElementById('galleryCounter');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
+  // swap menu icon into back arrow (visually we just keep same button but function handles back)
+  // open modal
+  modal.classList.add('open'); modal.parentElement.classList.add('open'); // backdrop
+  modal.parentElement.classList.toggle('open', true);
+  modal.parentElement.setAttribute('aria-hidden', 'false');
+  modal.style.display = 'flex';
+  showGalleryImage(0);
 
-  let currentList = [];
-  let currentIndex = 0;
+  // clicking menu button while gallery open will call closeGallery() (handled above)
+}
 
-  function openGallery(projectId){
-    galleryModal.setAttribute('aria-hidden','false');
-    document.body.style.overflow='hidden';
-    const p = PROJECTS.find(p=>p.id===projectId);
-    galleryTitle.textContent = p?.title || projectId;
-    loadProjectImages(projectId, p?.maxImages ?? 6).then(urls=>{
-      currentList = urls;
-      currentIndex = 0;
-      showIndex(0);
-    });
+function closeGallery(){
+  galleryState = { open:false, pid:null, images:[], current:0, openIndex:null };
+  modal.parentElement.classList.remove('open');
+  modal.parentElement.setAttribute('aria-hidden','true');
+  modal.style.display = 'none';
+  currentTitle.textContent = 'EROS•MACHINE — Sélection';
+}
+
+/* show image by index */
+function showGalleryImage(i){
+  if(!galleryState.images.length) return;
+  galleryState.current = (i + galleryState.images.length) % galleryState.images.length;
+  modalImage.src = galleryState.images[galleryState.current];
+  modalTitle.textContent = PROJECT_TITLES[galleryState.openIndex] ?? galleryState.pid;
+  counter.textContent = `${galleryState.current + 1} / ${galleryState.images.length}`;
+}
+
+/* prev/next handlers */
+prevBtn.addEventListener('click', ()=> showGalleryImage(galleryState.current - 1));
+nextBtn.addEventListener('click', ()=> showGalleryImage(galleryState.current + 1));
+
+/* close when click backdrop */
+document.getElementById('modal').addEventListener('click', (e)=>{
+  if(e.target === document.getElementById('modal')) closeGallery();
+});
+/* keyboard navigation */
+window.addEventListener('keydown', (e)=>{
+  if(!galleryState.open) return;
+  if(e.key === 'ArrowLeft') prevBtn.click();
+  if(e.key === 'ArrowRight') nextBtn.click();
+  if(e.key === 'Escape') closeGallery();
+});
+
+/* ---------- small HEAD check function to ensure existing files included ---------- */
+async function fileExists(url){
+  try{
+    const res = await fetch(url, { method:'HEAD' });
+    return res.ok;
+  }catch(err){
+    // fetch HEAD might be blocked by CORS on some hosts, fallback to try fetching the image
+    try{
+      const r = await fetch(url, { method:'GET' });
+      return r.ok;
+    }catch(e){
+      return false;
+    }
   }
-  function closeGallery(){ galleryModal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-  function showIndex(i){
-    if(!currentList.length) return;
-    currentIndex = (i+currentList.length)%currentList.length;
-    galleryImage.src = currentList[currentIndex];
+}
+
+/* ---------- ensure bgLayer only becomes visible after hero scroll by setting z-index and starting cycle (handled above) ---------- */
+/* ---------- ensure clicking anywhere on the page (outside hero) will not break interactions ---------- */
+
+/* Optional: lazy show covers by preloading very slightly when background activates */
+startBgCycleIfHeroScrolled = () => {
+  // (handled by IntersectionObserver)
+};
+
+/* Prevent form default to ensure mailto works in many clients but keep default behavior */
+document.getElementById('newsletter').addEventListener('submit', (e)=>{
+  // default action will open mail client; keep that, but for UX we can show an alert
+  setTimeout(()=> alert('Merci — votre message va être envoyé via votre client email.'), 200);
+});
+</script>
+</body>
+</html>
